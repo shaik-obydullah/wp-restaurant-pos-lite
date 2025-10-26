@@ -19,6 +19,8 @@ class WP_Restaurant_POS_Lite_Activator
         $table_categories = $wpdb->prefix . 'pos_categories';
         $table_products = $wpdb->prefix . 'pos_products';
         $table_stocks = $wpdb->prefix . 'pos_stocks';
+        $table_customers = $wpdb->prefix . 'pos_customers';
+        $table_sales = $wpdb->prefix . 'pos_sales';
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -59,10 +61,45 @@ class WP_Restaurant_POS_Lite_Activator
                 ON DELETE CASCADE
         ) $charset_collate;";
 
+        // 🔹 Customers Table
+        $sql_customers = "CREATE TABLE $table_customers (
+            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            balance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            mobile VARCHAR(20) DEFAULT NULL,
+            status ENUM('active','inactive') DEFAULT 'active',
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+
+        $sql_sales = "CREATE TABLE $table_sales (
+            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            fk_customer_id BIGINT(20) UNSIGNED DEFAULT NULL,
+            invoice_id VARCHAR(30) DEFAULT NULL,
+            net_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            vat_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            shipping_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            grand_total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            paid_amount DECIMAL(10,2) DEFAULT NULL,
+            buy_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            sale_due DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            status ENUM('saveSale','completed','canceled') NOT NULL DEFAULT 'completed',
+            note TEXT DEFAULT NULL,
+            PRIMARY KEY (id),
+            KEY fk_customer_id (fk_customer_id),
+            CONSTRAINT fk_pos_sale_customer FOREIGN KEY (fk_customer_id)
+                REFERENCES $table_customers (id)
+                ON DELETE SET NULL
+        ) $charset_collate;";
+
         // Execute table creation
         dbDelta($sql_categories);
         dbDelta($sql_products);
         dbDelta($sql_stocks);
+        dbDelta($sql_customers);
+        dbDelta($sql_sales);
 
         // 🔹 Seed Default Categories (safe seeding with duplicate check)
         $default_categories = array(
