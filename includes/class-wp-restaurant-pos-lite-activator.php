@@ -21,6 +21,7 @@ class WP_Restaurant_POS_Lite_Activator
         $table_stocks = $wpdb->prefix . 'pos_stocks';
         $table_customers = $wpdb->prefix . 'pos_customers';
         $table_sales = $wpdb->prefix . 'pos_sales';
+        $table_accounting = $wpdb->prefix . 'pos_accounting';
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -72,6 +73,7 @@ class WP_Restaurant_POS_Lite_Activator
             PRIMARY KEY (id)
         ) $charset_collate;";
 
+        // 🔹 Sales Table
         $sql_sales = "CREATE TABLE $table_sales (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             fk_customer_id BIGINT(20) UNSIGNED DEFAULT NULL,
@@ -94,12 +96,23 @@ class WP_Restaurant_POS_Lite_Activator
                 ON DELETE SET NULL
         ) $charset_collate;";
 
+        // 🔹 Accounting Table
+        $sql_accounting = "CREATE TABLE $table_accounting (
+            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            in_amount DECIMAL(10,2) DEFAULT NULL,
+            out_amount DECIMAL(10,2) DEFAULT NULL,
+            amount_payable DECIMAL(10,2) DEFAULT NULL,
+            amount_receivable DECIMAL(10,2) DEFAULT NULL,
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+
         // Execute table creation
         dbDelta($sql_categories);
         dbDelta($sql_products);
         dbDelta($sql_stocks);
         dbDelta($sql_customers);
         dbDelta($sql_sales);
+        dbDelta($sql_accounting);
 
         // 🔹 Seed Default Categories (safe seeding with duplicate check)
         $default_categories = array(
