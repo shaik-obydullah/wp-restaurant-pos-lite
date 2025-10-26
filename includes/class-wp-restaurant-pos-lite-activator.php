@@ -16,13 +16,14 @@ class WP_Restaurant_POS_Lite_Activator
 
         $charset_collate = $wpdb->get_charset_collate();
 
-        $table_categories = $wpdb->prefix . 'pos_categories';
-        $table_products = $wpdb->prefix . 'pos_products';
-        $table_stocks = $wpdb->prefix . 'pos_stocks';
+        // Table names
+        $table_categories        = $wpdb->prefix . 'pos_categories';
+        $table_products          = $wpdb->prefix . 'pos_products';
+        $table_stocks            = $wpdb->prefix . 'pos_stocks';
         $table_stock_adjustments = $wpdb->prefix . 'pos_stock_adjustments';
-        $table_customers = $wpdb->prefix . 'pos_customers';
-        $table_sales = $wpdb->prefix . 'pos_sales';
-        $table_accounting = $wpdb->prefix . 'pos_accounting';
+        $table_customers         = $wpdb->prefix . 'pos_customers';
+        $table_sales             = $wpdb->prefix . 'pos_sales';
+        $table_accounting        = $wpdb->prefix . 'pos_accounting';
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -30,7 +31,9 @@ class WP_Restaurant_POS_Lite_Activator
         $sql_categories = "CREATE TABLE $table_categories (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
-            status ENUM('active', 'inactive') DEFAULT 'active',
+            status ENUM('active','inactive') DEFAULT 'active',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id)
         ) $charset_collate;";
 
@@ -40,7 +43,9 @@ class WP_Restaurant_POS_Lite_Activator
             name VARCHAR(255) NOT NULL,
             fk_category_id BIGINT(20) UNSIGNED NOT NULL,
             image VARCHAR(255) DEFAULT NULL,
-            status ENUM('active', 'inactive') DEFAULT 'active',
+            status ENUM('active','inactive') DEFAULT 'active',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY fk_category_id (fk_category_id),
             CONSTRAINT fk_pos_product_category FOREIGN KEY (fk_category_id)
@@ -55,11 +60,13 @@ class WP_Restaurant_POS_Lite_Activator
             net_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
             sale_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
             quantity INT(11) NOT NULL DEFAULT 0,
-            status ENUM('inStock', 'outStock', 'lowStock') DEFAULT 'inStock',
+            status ENUM('inStock','outStock','lowStock') DEFAULT 'inStock',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY fk_product_id (fk_product_id),
             CONSTRAINT fk_pos_stock_product FOREIGN KEY (fk_product_id)
-                REFERENCES $table_products (id)
+                REFERENCES $table_products(id)
                 ON DELETE CASCADE
         ) $charset_collate;";
 
@@ -74,7 +81,7 @@ class WP_Restaurant_POS_Lite_Activator
             PRIMARY KEY (id),
             KEY fk_product_id (fk_product_id),
             CONSTRAINT fk_pos_adjustment_product FOREIGN KEY (fk_product_id)
-                REFERENCES {$wpdb->prefix}pos_products(id)
+                REFERENCES $table_products(id)
                 ON DELETE CASCADE
         ) $charset_collate;";
 
@@ -86,6 +93,8 @@ class WP_Restaurant_POS_Lite_Activator
             email VARCHAR(255) NOT NULL,
             mobile VARCHAR(20) DEFAULT NULL,
             status ENUM('active','inactive') DEFAULT 'active',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id)
         ) $charset_collate;";
 
@@ -105,10 +114,12 @@ class WP_Restaurant_POS_Lite_Activator
             sale_due DECIMAL(10,2) NOT NULL DEFAULT 0.00,
             status ENUM('saveSale','completed','canceled') NOT NULL DEFAULT 'completed',
             note TEXT DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY fk_customer_id (fk_customer_id),
             CONSTRAINT fk_pos_sale_customer FOREIGN KEY (fk_customer_id)
-                REFERENCES $table_customers (id)
+                REFERENCES $table_customers(id)
                 ON DELETE SET NULL
         ) $charset_collate;";
 
@@ -119,6 +130,7 @@ class WP_Restaurant_POS_Lite_Activator
             out_amount DECIMAL(10,2) DEFAULT NULL,
             amount_payable DECIMAL(10,2) DEFAULT NULL,
             amount_receivable DECIMAL(10,2) DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id)
         ) $charset_collate;";
 
@@ -131,7 +143,7 @@ class WP_Restaurant_POS_Lite_Activator
         dbDelta($sql_sales);
         dbDelta($sql_accounting);
 
-        // 🔹 Seed Default Categories (safe seeding with duplicate check)
+        // 🔹 Seed Default Categories (safe duplicate check)
         $default_categories = array(
             array('name' => 'Starter', 'status' => 'inactive'),
             array('name' => 'Main Dish', 'status' => 'inactive'),
@@ -148,7 +160,7 @@ class WP_Restaurant_POS_Lite_Activator
             );
 
             if ((int) $exists === 0) {
-                $wpdb->insert($table_categories, $category, array('%s', '%s'));
+                $wpdb->insert($table_categories, $category, array('%s','%s'));
             }
         }
     }
