@@ -17,6 +17,7 @@ class WP_Restaurant_POS_Lite_Activator {
 
         $table_categories = $wpdb->prefix . 'pos_categories';
         $table_products   = $wpdb->prefix . 'pos_products';
+        $table_stocks   = $wpdb->prefix . 'pos_stocks';
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -42,9 +43,26 @@ class WP_Restaurant_POS_Lite_Activator {
                 ON DELETE CASCADE
         ) $charset_collate;";
 
+        // 🔹 Stocks Table
+        $sql_stocks = "CREATE TABLE $table_stocks (
+            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            fk_product_id BIGINT(20) UNSIGNED NOT NULL,
+            net_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            sale_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            quantity INT(11) NOT NULL DEFAULT 0,
+            status ENUM('inStock', 'outStock', 'lowStock') DEFAULT 'inStock',
+            PRIMARY KEY  (id),
+            KEY fk_product_id (fk_product_id),
+            CONSTRAINT fk_product FOREIGN KEY (fk_product_id)
+                REFERENCES $table_products (id)
+                ON DELETE CASCADE
+        ) $charset_collate;";
+
+
         // Execute table creation
         dbDelta($sql_categories);
         dbDelta($sql_products);
+        dbDelta($sql_stocks);
 
         // Optional: Insert a default category
         $default_category = $wpdb->get_var( "SELECT COUNT(*) FROM $table_categories" );
