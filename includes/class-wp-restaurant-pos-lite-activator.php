@@ -19,6 +19,7 @@ class WP_Restaurant_POS_Lite_Activator
         $table_categories = $wpdb->prefix . 'pos_categories';
         $table_products = $wpdb->prefix . 'pos_products';
         $table_stocks = $wpdb->prefix . 'pos_stocks';
+        $table_stock_adjustments = $wpdb->prefix . 'pos_stock_adjustments';
         $table_customers = $wpdb->prefix . 'pos_customers';
         $table_sales = $wpdb->prefix . 'pos_sales';
         $table_accounting = $wpdb->prefix . 'pos_accounting';
@@ -59,6 +60,21 @@ class WP_Restaurant_POS_Lite_Activator
             KEY fk_product_id (fk_product_id),
             CONSTRAINT fk_pos_stock_product FOREIGN KEY (fk_product_id)
                 REFERENCES $table_products (id)
+                ON DELETE CASCADE
+        ) $charset_collate;";
+
+        // 🔹 Stock Adjustments Table
+        $sql_stock_adjustments = "CREATE TABLE $table_stock_adjustments (
+            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            fk_product_id BIGINT(20) UNSIGNED NOT NULL,
+            adjustment_type ENUM('increase','decrease') NOT NULL,
+            quantity INT(11) NOT NULL,
+            note TEXT DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY fk_product_id (fk_product_id),
+            CONSTRAINT fk_pos_adjustment_product FOREIGN KEY (fk_product_id)
+                REFERENCES {$wpdb->prefix}pos_products(id)
                 ON DELETE CASCADE
         ) $charset_collate;";
 
@@ -110,6 +126,7 @@ class WP_Restaurant_POS_Lite_Activator
         dbDelta($sql_categories);
         dbDelta($sql_products);
         dbDelta($sql_stocks);
+        dbDelta($sql_stock_adjustments);
         dbDelta($sql_customers);
         dbDelta($sql_sales);
         dbDelta($sql_accounting);
