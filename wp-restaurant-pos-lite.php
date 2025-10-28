@@ -31,38 +31,35 @@ define( 'WP_RESTAURANT_POS_LITE_URL', plugin_dir_url( __FILE__ ) );
 define( 'WP_RESTAURANT_POS_LITE_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
- * Include the activator and deactivator classes.
+ * Include activator and deactivator.
  */
 require_once WP_RESTAURANT_POS_LITE_PATH . 'includes/class-wp-restaurant-pos-lite-activator.php';
 require_once WP_RESTAURANT_POS_LITE_PATH . 'includes/class-wp-restaurant-pos-lite-deactivator.php';
 
 /**
- * The code that runs during plugin activation.
+ * Activation and deactivation hooks.
  */
 function activate_wp_restaurant_pos_lite() {
 	WP_Restaurant_POS_Lite_Activator::activate();
 }
-
-/**
- * The code that runs during plugin deactivation.
- */
 function deactivate_wp_restaurant_pos_lite() {
 	WP_Restaurant_POS_Lite_Deactivator::deactivate();
 }
-
 register_activation_hook( __FILE__, 'activate_wp_restaurant_pos_lite' );
 register_deactivation_hook( __FILE__, 'deactivate_wp_restaurant_pos_lite' );
 
 /**
- * Begin execution of the plugin.
- * 
- * This section would normally initialize your main functionality.
+ * Main plugin execution.
  */
 function run_wp_restaurant_pos_lite() {
-	// Load plugin text domain for translations.
+
+	// Load text domain
 	load_plugin_textdomain( 'wp-restaurant-pos-lite', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
-	// Example: include core class to handle admin pages or shortcodes later.
-	// require_once WP_RESTAURANT_POS_LITE_PATH . 'includes/class-wp-restaurant-pos-lite.php';
+	// Include the admin handler
+	require_once WP_RESTAURANT_POS_LITE_PATH . 'includes/class-wp-restaurant-pos-lite-handler.php';
+
+	// Initialize the handler (handles menus, etc.)
+	new WP_Restaurant_POS_Lite_Handler();
 }
-run_wp_restaurant_pos_lite();
+add_action( 'plugins_loaded', 'run_wp_restaurant_pos_lite' );

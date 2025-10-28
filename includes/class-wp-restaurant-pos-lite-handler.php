@@ -51,6 +51,15 @@ class WP_Restaurant_POS_Lite_Handler {
 
 		add_submenu_page(
 			'wp-restaurant-pos-lite',
+			__( 'Categories', 'wp-restaurant-pos-lite' ),
+			__( 'Categories', 'wp-restaurant-pos-lite' ),
+			'manage_options',
+			'wp-restaurant-pos-lite-categories',
+			[ $this, 'render_categories_page' ]
+		);
+
+		add_submenu_page(
+			'wp-restaurant-pos-lite',
 			__( 'Products', 'wp-restaurant-pos-lite' ),
 			__( 'Products', 'wp-restaurant-pos-lite' ),
 			'manage_options',
@@ -93,6 +102,78 @@ class WP_Restaurant_POS_Lite_Handler {
 		echo '<div class="wrap"><h1>' . esc_html__( 'Restaurant POS Dashboard', 'wp-restaurant-pos-lite' ) . '</h1>';
 		echo '<p>' . esc_html__( 'Welcome to WP Restaurant POS Lite. Manage your POS data here.', 'wp-restaurant-pos-lite' ) . '</p></div>';
 	}
+
+	/** 
+	 * Categories Page.
+	 */
+	
+/**
+ * Categories Page.
+ */
+public function render_categories_page() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have permission to access this page.', 'wp-restaurant-pos-lite' ) );
+    }
+
+    ?>
+    <div class="wrap">
+        <h1><?php esc_html_e( 'Product Categories', 'wp-restaurant-pos-lite' ); ?></h1>
+        <p><?php esc_html_e( 'Manage product categories such as Food, Drinks, Desserts, etc.', 'wp-restaurant-pos-lite' ); ?></p>
+
+        <div id="category-ui" style="display: flex; gap: 40px; margin-top: 20px;">
+            <!-- Add Category Form -->
+            <div style="flex: 1; max-width: 400px;">
+                <h2><?php esc_html_e( 'Add New Category', 'wp-restaurant-pos-lite' ); ?></h2>
+                <form method="post">
+                    <?php wp_nonce_field( 'wp_restaurant_pos_lite_add_category', 'wp_restaurant_pos_lite_nonce' ); ?>
+
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><label for="category_name"><?php esc_html_e( 'Category Name', 'wp-restaurant-pos-lite' ); ?></label></th>
+                            <td><input name="category_name" type="text" id="category_name" class="regular-text" required></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="category_description"><?php esc_html_e( 'Description', 'wp-restaurant-pos-lite' ); ?></label></th>
+                            <td><textarea name="category_description" id="category_description" class="large-text" rows="3"></textarea></td>
+                        </tr>
+                    </table>
+
+                    <?php submit_button( __( 'Add Category', 'wp-restaurant-pos-lite' ) ); ?>
+                </form>
+            </div>
+
+            <!-- Category List -->
+            <div style="flex: 2;">
+                <h2><?php esc_html_e( 'Existing Categories', 'wp-restaurant-pos-lite' ); ?></h2>
+                <table class="widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'ID', 'wp-restaurant-pos-lite' ); ?></th>
+                            <th><?php esc_html_e( 'Name', 'wp-restaurant-pos-lite' ); ?></th>
+                            <th><?php esc_html_e( 'Description', 'wp-restaurant-pos-lite' ); ?></th>
+                            <th><?php esc_html_e( 'Actions', 'wp-restaurant-pos-lite' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Food</td>
+                            <td>Main dishes and entrees</td>
+                            <td><a href="#" class="button button-small disabled"><?php esc_html_e( 'Edit', 'wp-restaurant-pos-lite' ); ?></a></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Drinks</td>
+                            <td>Beverages and cold drinks</td>
+                            <td><a href="#" class="button button-small disabled"><?php esc_html_e( 'Edit', 'wp-restaurant-pos-lite' ); ?></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <?php
+}
 
 	/**
 	 * Products Page.
